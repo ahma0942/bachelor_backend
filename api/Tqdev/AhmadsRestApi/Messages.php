@@ -66,7 +66,7 @@ class Messages
 			'filter=timestamp,ge,'.$request->getPathSegment(4).'&'.
 			'filter=deleted,eq,0&'.
 			'filter=user_id,neq,'.$user['id'].'&'.
-			'include=users.id,users.name,users.role_id,users.avatar,id,message,type,timestamp,number,changed',[],''
+			'include=users.id,users.name,users.role_id,users.avatar,id,message,type,timestamp,number,changed,deleted',[],''
 		);
 	}
 
