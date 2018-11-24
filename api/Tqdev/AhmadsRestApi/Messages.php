@@ -7,14 +7,21 @@ class Messages
 {
 	public function __construct(Request &$request, $user)
 	{
-		if(is_numeric($request->getPathSegment(3)) && strtolower($request->getPathSegment(4))=="getchatname") $this->getChatName($request, $user);
-		elseif(is_numeric($request->getPathSegment(3)) && is_numeric($request->getPathSegment(4)) && is_numeric($request->getPathSegment(5))) $this->getOldMessages($request, $user);
-		elseif(is_numeric($request->getPathSegment(3)) && is_numeric($request->getPathSegment(4))) $this->getNewMessages($request, $user);
-		elseif($request->getPathSegment(4)=='Search') $this->Search($request, $user);
-		else {
-			if($request->getMethod()=='POST' && $request->getPathSegment(3)=='') $this->sendMessage($request, $user);
+		if($request->getMethod()=='GET') {
+			if(!is_numeric($request->getPathSegment(3))) _http(404);
+			if(strtolower($request->getPathSegment(4))=="getchatname") $this->getChatName($request, $user);
+			elseif(is_numeric($request->getPathSegment(4)) && is_numeric($request->getPathSegment(5))) $this->getOldMessages($request, $user);
+			elseif(is_numeric($request->getPathSegment(4))) $this->getNewMessages($request, $user);
+			elseif($request->getPathSegment(4)=='Search') $this->Search($request, $user);
+			else _http(404);
+		} elseif($request->getMethod()=='POST') {
+			if($request->getPathSegment(3)=='') $this->sendMessage($request, $user);
+			else _http(404);
+		} elseif($request->getMethod()=='DELETE') {
+			if(is_numeric($request->getPathSegment(3))) $this->deleteMessage($request, $user);
 			else _http(404);
 		}
+		else _http(404);
 	}
 
 	private function Search(Request &$request, $user){
@@ -51,7 +58,7 @@ class Messages
 			'filter=project_id,eq,'.$request->getPathSegment(3).'&'.
 			'filter=timestamp,le,'.$request->getPathSegment(5).'&'.
 			'filter=deleted,eq,0&'.
-			'include=users.id,users.name,users.role_id,users.avatar,id,message,type,timestamp,number,changed',[],''
+			'include=users.id,users.name,users.role_id,users.avatar,id,message,type,timestamp,number,changed,deleted',[],''
 		);
 	}
 
@@ -62,10 +69,12 @@ class Messages
 			'order=id,desc&'.
 			'page=1,50&'.
 			'join=users&'.
-			'filter=project_id,eq,'.$request->getPathSegment(3).'&'.
-			'filter=timestamp,ge,'.$request->getPathSegment(4).'&'.
-			'filter=deleted,eq,0&'.
-			'filter=user_id,neq,'.$user['id'].'&'.
+			'filter1=project_id,eq,'.$request->getPathSegment(3).'&'.
+			'filter1=user_id,neq,'.$user['id'].'&'.
+			'filter1=timestamp,gt,'.$request->getPathSegment(4).'&'.
+			'filter2=project_id,eq,'.$request->getPathSegment(3).'&'.
+			'filter2=user_id,neq,'.$user['id'].'&'.
+			'filter2=changed,gt,'.$request->getPathSegment(4).'&'.
 			'include=users.id,users.name,users.role_id,users.avatar,id,message,type,timestamp,number,changed,deleted',[],''
 		);
 	}
@@ -102,5 +111,18 @@ class Messages
 		}
 		else $body->type=1;
 		$request=new Request('POST','/records/messages/','',[],json_encode($body));
+	}
+
+	private function deleteMessage(Request &$request, $user){
+		if(!UserOwnMessage($user['id'],$request->getPathSegment(3))) _http(400);
+		$body['deleted']=1;
+		$body['changed']=time();
+		$request=new Request(
+			'PUT',
+			'/records/messages/'.$request->getPathSegment(3),
+			'',
+			[],
+			json_encode($body)
+		);
 	}
 }

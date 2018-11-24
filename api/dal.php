@@ -49,6 +49,12 @@ function GetProjects()
 	return $sql;
 }
 
+function UserOwnMessage($user_id,$message_id)
+{
+	if(sql("SELECT id FROM messages WHERE id=? AND user_id=?",[$message_id,$user_id],'ii',1)) return true;
+	return false;
+}
+
 function AddProject($name, $admin)
 {
 	global $GLOBAL_DB;
