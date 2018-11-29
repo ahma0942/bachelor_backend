@@ -9,7 +9,9 @@ class User
 	{
 		switch(strtolower($request->getPathSegment(3))){
 			case "profile":
-				$this->profile($request, $user);
+				if($request->getMethod()=="GET") $this->profile($request, $user);
+				else if($request->getMethod()=="POST") $this->saveProfile($request, $user);
+				else _http(404);
 				break;
 			default:
 				_http(404);
@@ -19,24 +21,27 @@ class User
 
 	private function profile(Request &$request, $user){
 		$request=new Request('GET','/records/users/'.$user['id'],'include=avatar,created,email,id,name,phone,role_id',[],'');
-//		print_r($this->request);
-//		_http(200);
-//		exit;
 	}
 
-	private function chat(){
-		if(!isset($_POST['chat']) || !is_numeric($_POST['chat'])) _http(404);
+	private function saveProfile(Request &$request, $user){
+		$body=$request->getBody();
+		if(isset($body->file)) {
+			$messageTypes=['image'=>[2,"jpeg"=>"jpg","jpg"=>"jpg","png"=>"png"],'Video'=>3,'File'=>4];
+			list($type, $body->file->src) = explode(';', $body->file->src);
+			list(,$body->file->src) = explode(',', $body->file->src);
+			$body->file->src = base64_decode($body->file->src);
 
-		$data=Logged();
-		if($data===false) _http(403);
+			$type = explode('/',explode(':',$type)[1]);
+			if(!isset($messageTypes[$type[0]])) _http(400,"Unsupported File Type");
+			if(!isset($messageTypes[$type[0]][$type[1]])) _http(400,"Unsupported File Extension");
 
-		$role=GetRoleByChatId($_POST['chat'],$data['id']);
-		if($role===false) _http(403);
-
-		SetSessionChatIfNotExist($_POST['chat'],$data['id']);
-		$groupid=$_POST['chat'];
-
-		require("pages/$role/chat.php");
-		exit;
+			$id=uniqid();
+			file_put_contents(__DIR__.'/../../../img/avi/'.$id.'.'.$messageTypes[$type[0]][$type[1]], $body->file->src);
+			unset($body->file);
+			$body->avatar=$id.'.'.$messageTypes[$type[0]][$type[1]];
+			$avatar=GetAvatarById($user['id']);
+			if($avatar!='default.png') unlink(__DIR__.'/../../../img/avi/'.$avatar);
+		}
+		$request=new Request('PUT','/records/users/'.$user['id'],'',[],json_encode($body));
 	}
 }

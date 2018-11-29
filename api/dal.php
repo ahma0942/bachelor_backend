@@ -12,6 +12,12 @@ function GetGroupAndRoleByUserIdInSession($userid){
 	return sql("CALL get_group_and_role_by_user_id_in_session(?)",[$userid],'i',2);
 }
 
+function GetAvatarById($userid) {
+	$sql=sql("SELECT avatar FROM users WHERE id=?",[$userid],'s',2);
+	if(empty($sql)) return false;
+	return $sql[0]['avatar'];
+}
+
 function GetGroupsByToken($token){
 	$sql=sql("SELECT name FROM groups WHERE id IN (SELECT group_id FROM user_has_group WHERE user_id=(SELECT id FROM users WHERE token=?))",[$token],'s',2);
 	$groups=[];
