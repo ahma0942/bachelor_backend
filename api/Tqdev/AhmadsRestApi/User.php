@@ -42,6 +42,7 @@ class User
 			$avatar=GetAvatarById($user['id']);
 			if($avatar!='default.png') unlink(__DIR__.'/../../../img/avi/'.$avatar);
 		}
-		$request=new Request('PUT','/records/users/'.$user['id'],'',[],json_encode($body));
+		if(UpdateProfile($user['id'],$body)) _http(200,json_encode($body));
+		else _http(500,"Something went wrong");
 	}
 }

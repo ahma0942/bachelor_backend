@@ -18,6 +18,24 @@ function GetAvatarById($userid) {
 	return $sql[0]['avatar'];
 }
 
+function UpdateProfile($id, $body)
+{
+	$sql="UPDATE users SET ";
+	$types="";
+	$arr=[];
+	foreach($body as $name=>$value) {
+		$sql.="$name=?, ";
+		if($name!="phone") $types.="s";
+		else $types.="i";
+		$arr[]=$value;
+	}
+	$sql=substr($sql,0,-2)." WHERE id=?";
+	$types.="i";
+	$arr[]=$id;
+	if(sql($sql,$arr,$types)) return true;
+	return false;
+}
+
 function GetGroupsByToken($token){
 	$sql=sql("SELECT name FROM groups WHERE id IN (SELECT group_id FROM user_has_group WHERE user_id=(SELECT id FROM users WHERE token=?))",[$token],'s',2);
 	$groups=[];
@@ -34,7 +52,7 @@ function Logged($token)
 
 function login($email, $password)
 {
-	$sql=sql("SELECT id,avatar,name,role_id,token FROM users WHERE email=? AND password=?",[$email,hasher($password)],'ss',2);
+	$sql=sql("SELECT id,avatar,name,email,phone,role_id,token FROM users WHERE email=? AND password=?",[$email,hasher($password)],'ss',2);
 	if(empty($sql)) return false;
 	return $sql[0];
 }

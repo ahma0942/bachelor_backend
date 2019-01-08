@@ -28,9 +28,11 @@ class Messages
 		$search=$request->getPathSegment(5);
 
 		$params=[];
-		$params[]='page=1,5';
+		$params[]='page=1,10';
 		$params[]='join=users';
 		$params[]='filter=project_id,eq,'.$request->getPathSegment(3);
+		$params[]='filter=deleted,eq,0&';
+
 		if($search=='') $params[]='order=id,desc';
 		else{
 			if(strpos($search,' ')!==false){
@@ -43,7 +45,7 @@ class Messages
 				$params[]="filter=message,cs,$search";
 			}
 		}
-		$params[]='include=users.id,users.name,users.role_id,users.avatar,message,timestamp,number';
+		$params[]='include=users.id,users.name,users.role_id,users.avatar,id,message,type,timestamp,number,changed,deleted';
 
 		$request=new Request('GET','/records/messages/',implode('&',$params),[],'');
 	}
