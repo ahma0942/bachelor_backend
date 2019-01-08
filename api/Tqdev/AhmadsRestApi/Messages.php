@@ -116,7 +116,8 @@ class Messages
 	}
 
 	private function deleteMessage(Request &$request, $user){
-		if(!UserOwnMessage($user['id'],$request->getPathSegment(3))) _http(400);
+		//if(!UserOwnMessage($user['id'],$request->getPathSegment(3))) _http(400);
+		if($user['role_id']!=2) _http(400);
 		$body['deleted']=1;
 		$body['changed']=time();
 		$request=new Request(
