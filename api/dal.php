@@ -62,6 +62,16 @@ function Logged($token)
 	return $sql[0];
 }
 
+function ChangePassword($id,$oldpass,$newpass,$confpass)
+{
+	if($newpass!=$confpass) return false;
+	$sql=sql("SELECT id FROM users WHERE id=? AND password=?",[$id,hasher($oldpass)],'is',1);
+	if(!$sql) return false;
+	$sql=sql("UPDATE users SET password=? WHERE id=?",[hasher($newpass),$id],'si');
+	if($sql) return true;
+	return false;
+}
+
 function login($email, $password)
 {
 	$sql=sql("SELECT id,avatar,name,email,phone,role_id,token FROM users WHERE email=? AND password=?",[$email,hasher($password)],'ss',2);

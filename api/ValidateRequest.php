@@ -12,6 +12,7 @@ class ValidateRequest
 		if($request->getMethod()=="OPTIONS") _http(200);
 		if($request->getMethod()=="POST" && strtolower($request->getPathSegment(2))=="login") $this->login($request->getBody());
 		$user=_auth();
+		if($request->getMethod()=="PUT" && strtolower($request->getPathSegment(2))=="changepassword") $this->changePassword($request->getBody(), $user);
 
 		switch(strtolower($request->getPathSegment(2))){
 			case "user":
@@ -42,5 +43,10 @@ class ValidateRequest
 		else {
 			_http(200,json_encode($user));
 		}
+	}
+
+	private function changePassword($body,$user) {
+		if(ChangePassword($user['id'],$body->oldpass,$body->newpass,$body->confpass)) _http(204);
+		_http(400);
 	}
 }

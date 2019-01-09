@@ -175,9 +175,9 @@ class Admin
 		
 		Thank you for your interest in $INFO[name].<br/>
 		You have been invited to join $INFO[name].<br/>
-		To activate your account, click the link below and follow the instructions.<br/>
-		<a href='$INFO[url]/?p=confirm&token=$confirm_email&email={$body->email}'>$INFO[url]/?p=confirm&token=$confirm_email&email={$body->email}</a><br/>
-		We have assigned you a temporary password which you can change when you login. <b>Your temporary password is:</b><br/>
+		".//To activate your account, click the link below and follow the instructions.<br/>
+		//<a href='$INFO[url]/?p=confirm&token=$confirm_email&email={$body->email}'>$INFO[url]/?p=confirm&token=$confirm_email&email={$body->email}</a><br/>
+		"We have assigned you a temporary password which you can change when you login. <b>Your temporary password is:</b><br/>
 		<h2>$password</h2>
 		If you didn't sign up at $INFO[name], simply ignore this mail, and we apologize for any trouble it may have caused you.<br/><br/>
 		
