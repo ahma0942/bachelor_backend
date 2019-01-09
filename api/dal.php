@@ -43,6 +43,18 @@ function GetGroupsByToken($token){
 	return $groups;
 }
 
+function RemoveProjectFromUser($userid,$projectid){
+	$sql=sql("DELETE FROM projects_has_users WHERE user_id=? AND project_id=?",[$userid,$projectid],'ii');
+	if($sql) return true;
+	return false;
+}
+
+function AddProjectFromUser($userid,$projectid){
+	$sql=sql("INSERT INTO projects_has_users (project_id,user_id,timestamp) VALUES (?,?,".time().")",[$projectid,$userid],'ii');
+	if($sql) return true;
+	return false;
+}
+
 function Logged($token)
 {
 	$sql=sql("SELECT id,role_id FROM users WHERE token=?",[$token],'s',2);

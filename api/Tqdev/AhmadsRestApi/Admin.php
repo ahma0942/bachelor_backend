@@ -39,15 +39,46 @@ class Admin
 			case "users":
 				if($request->getPathSegment(4)!="")
 				{
-					switch(strtolower($request->getMethod())){
-						case "put":
-							$this->putUsers($request);
-							break;
-						case "delete":
-							$this->deleteUsers($request);
-							break;
-						default:
-							_http(404);
+					if($request->getPathSegment(5)!=""){
+						switch(strtolower($request->getPathSegment(5))){
+							case "projects":
+								if($request->getPathSegment(6)!=""){
+									switch(strtolower($request->getMethod())) {
+										case "post":
+											$this->addProjectFromUser($request);
+											break;
+										case "delete":
+											$this->removeProjectFromUser($request);
+											break;
+										default:
+											_http(404);
+									}
+								}
+								else {
+									switch(strtolower($request->getMethod())){
+										case "get":
+											$this->getUserProjects($request);
+											break;
+										default:
+											_http(404);
+									}
+								}
+								break;
+							default:
+								_http(404);
+						}
+					}
+					else {
+						switch(strtolower($request->getMethod())){
+							case "put":
+								$this->putUsers($request);
+								break;
+							case "delete":
+								$this->deleteUsers($request);
+								break;
+							default:
+								_http(404);
+						}
 					}
 				}
 				else {
@@ -84,6 +115,28 @@ class Admin
 			'/records/users/',
 			'include=id,name,email,role_id&'.
 			'filter=deleted,eq,0',
+			[],
+			''
+		);
+	}
+
+	private function removeProjectFromUser(Request &$request){
+		if(RemoveProjectFromUser($request->getPathSegment(4),$request->getPathSegment(6))) _http(204);
+		_http(400);
+	}
+
+	private function addProjectFromUser(Request &$request){
+		if(AddProjectFromUser($request->getPathSegment(4),$request->getPathSegment(6))) _http(204);
+		_http(400);
+	}
+
+	private function getUserProjects(Request &$request){
+		$request=new Request(
+			'GET',
+			'/records/projects_has_users/',
+			'join=projects&'.
+			'filter=user_id,eq,'.$request->getPathSegment(4).'&'.
+			'include=projects.id,projects.name,projects.deleted,timestamp',
 			[],
 			''
 		);

@@ -28,7 +28,7 @@ class Projects
 			'/records/projects_has_users/',
 			'join=projects&'.
 			'filter=user_id,eq,'.$user['id'].'&'.
-			'include=projects.id,projects.name,projects.avatar',[],''
+			'include=projects.id,projects.name,projects.avatar,projects.deleted',[],''
 		);
 	}
 }
